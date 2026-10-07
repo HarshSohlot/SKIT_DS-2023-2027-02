@@ -14,7 +14,8 @@
 .externalNativeBuild
 .cxx
 local.properties
-
+dist/
+node_modules/
 # Python
 venv/
 .venv/
