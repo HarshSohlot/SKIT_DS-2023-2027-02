@@ -40,6 +40,23 @@ android {
 }
 
 dependencies {
+    // 1. Jetpack Compose Navigation: For type-safe routing across Welcome, Login, Register & Dashboards
+    implementation("androidx.navigation:navigation-compose:2.8.5")
+
+    // 2. Material Icons Extended: Gives access to Heart, Utensils, Location, Shield, Visibility, etc.
+    implementation("androidx.compose.material:material-icons-extended:1.7.6")
+
+    // 3. Lifecycle ViewModel Compose: For reactive state management in Compose
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+
+    // 4. Coroutines Android: For asynchronous operations and background state flows
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+
+    // 5. Retrofit & Moshi / Gson (Sprint 4 Integration with Karan's Spring Boot Backend)
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
