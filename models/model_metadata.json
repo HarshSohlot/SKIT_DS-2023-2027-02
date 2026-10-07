@@ -1,0 +1,41 @@
+{
+  "model_name": "CareKart Random Forest Regressor",
+  "algorithm": "RandomForestRegressor",
+  "n_estimators": 150,
+  "max_depth": 12,
+  "test_r2_score": 0.9826,
+  "test_mae_hours": 0.615,
+  "test_rmse_hours": 1.023,
+  "cv_mean_r2": 0.9776,
+  "features_used": [
+    "category",
+    "storage_condition",
+    "packaging_type",
+    "temperature_c",
+    "humidity_percent",
+    "hours_since_cooking",
+    "moisture_level"
+  ],
+  "top_features": [
+    {
+      "feature": "temperature_c",
+      "importance": 0.29140987977069527
+    },
+    {
+      "feature": "storage_condition_Refrigerated (4-7C)",
+      "importance": 0.24609905433110335
+    },
+    {
+      "feature": "moisture_level",
+      "importance": 0.17152221358927186
+    },
+    {
+      "feature": "hours_since_cooking",
+      "importance": 0.10827757799333082
+    },
+    {
+      "feature": "packaging_type_Open Container",
+      "importance": 0.07489220625386668
+    }
+  ]
+}

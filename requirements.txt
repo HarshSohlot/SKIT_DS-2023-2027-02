@@ -1,0 +1,11 @@
+# CareKart AI/ML Module Dependencies
+# Developer: Harshit Goyal (AI & ML Dev)
+
+numpy>=1.26.0
+pandas>=2.2.0
+scikit-learn>=1.4.0
+matplotlib>=3.8.0
+joblib>=1.3.0
+flask>=3.0.0
+flask-cors>=4.0.0
+ipykernel>=6.29.0
