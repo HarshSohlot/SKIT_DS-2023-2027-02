@@ -171,11 +171,3 @@ python src/app.py
   ```
 
 ---
-
-## 🎓 Academic Viva Questions & Answers for Harshit Goyal
-
-| Examiner Question | Model Answer |
-|---|---|
-| **"Why did you choose Random Forest over a Single Decision Tree or Linear Regression?"** | *"A single decision tree overfits noisy biological data, while Linear Regression assumes linear degradation ($R^2 = 0.885$). Random Forest is an ensemble of 150 bagged decision trees with feature subsampling, reducing variance and capturing non-linear threshold effects like rapid bacterial proliferation above 30°C, achieving an $R^2$ of 0.9827."* |
-| **"What are the top features affecting food shelf life?"** | *"Our feature importance analysis revealed that storage temperature ($28.4\%$) and cold-chain refrigeration ($25.5\%$) are the dominant factors, followed by food moisture content ($17.1\%$) and elapsed kitchen time ($10.8\%$) as per FSSAI safety norms."* |
-| **"How does your ML module connect with the rest of the CareKart team?"** | *"The model is serialized into `.pkl` binaries and exposed as a lightweight REST microservice (`app.py`). When a donor posts food in Kartavya's React web app or Harsh's Android app, Karan's Spring Boot backend calls `POST /api/predict-expiry` to validate shelf-life before listing."* |
