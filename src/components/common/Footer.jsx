@@ -59,7 +59,7 @@ export const Footer = () => {
                 <span className="text-emerald-400">Backend Dev (Spring Boot)</span>
               </li>
               <li className="flex justify-between font-medium text-slate-200">
-                <span>Kartavya Vashisth</span>
+                <span>Kartev Vashisth</span>
                 <span className="text-emerald-400 font-semibold">Web Dev (React.js)</span>
               </li>
             </ul>
