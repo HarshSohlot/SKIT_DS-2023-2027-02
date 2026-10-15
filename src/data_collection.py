@@ -1,168 +1,316 @@
-"""
-CareKart AI/ML Module — Sprint 1: Data Collection & Preprocessing
-Developer: Harshit Goyal (AI & ML Dev, Team DS-02, SKIT Jaipur)
-Project: CareKart — Food Redistribution System (SDG 2: Zero Hunger)
-"""
 
 import os
 import numpy as np
 import pandas as pd
 
-def generate_food_shelf_life_dataset(n_samples=2500, random_seed=42):
-    """
-    Synthesize realistic, domain-grounded food quality and shelf-life data
-    based on FSSAI guidelines, typical Indian food profiles, and Jaipur climate ranges.
-    """
-    np.random.seed(random_seed)
 
-    # Common food categories encountered in Indian food redistribution
-    categories = [
-        'Cooked Curry / Gravy',      # High moisture, high microbial spoilage rate
-        'Cooked Rice / Biryani',     # Prone to Bacillus cereus if left at room temp
-        'Dal & Lentils',             # High moisture, rapid acidification
-        'Indian Breads (Roti/Naan)', # Low-to-moderate moisture, slower spoilage
-        'Fried Items (Samosa/Puri)', # Low moisture, moderate shelf life
-        'Dairy & Desserts',          # Extremely perishable, high risk
-        'Raw Vegetables & Salad',    # High water activity, prone to wilting
-        'Bakery / Packaged Breads'   # Low water activity, preservatives present
-    ]
+# ============================================================
+# CareKart AI/ML: Food Shelf-Life Dataset Generator
+# Sprint 1: Data Collection and Preprocessing
+# ============================================================
 
-    food_items_map = {
-        'Cooked Curry / Gravy': ['Paneer Butter Masala', 'Mixed Veg Curry', 'Chole Gravy', 'Dum Aloo', 'Kadhai Paneer'],
-        'Cooked Rice / Biryani': ['Jeera Rice', 'Veg Biryani', 'Pulao', 'Khichdi', 'Steamed Rice'],
-        'Dal & Lentils': ['Dal Makhani', 'Dal Tadka', 'Sambhar', 'Yellow Dal', 'Chana Dal'],
-        'Indian Breads (Roti/Naan)': ['Tandoori Roti', 'Phulka Chapati', 'Butter Naan', 'Paratha', 'Puri'],
-        'Fried Items (Samosa/Puri)': ['Aloo Samosa', 'Veg Cutlet', 'Pakoda', 'Kachori', 'Spring Roll'],
-        'Dairy & Desserts': ['Gulab Jamun in Chashni', 'Rasgulla', 'Kheer / Payasam', 'Paneer Tikka', 'Sweet Lassi'],
-        'Raw Vegetables & Salad': ['Cucumber Tomato Salad', 'Sprouts Salad', 'Fruit Chaat', 'Boiled Corn Salad'],
-        'Bakery / Packaged Breads': ['White Bread Loaf', 'Pav Buns', 'Dinner Rolls', 'Fruit Buns']
+N_SAMPLES = 100_000
+RANDOM_SEED = 42
+
+CATEGORIES = [
+    "Cooked Curry / Gravy",
+    "Cooked Rice / Biryani",
+    "Dal & Lentils",
+    "Indian Breads (Roti/Naan)",
+    "Fried Items (Samosa/Puri)",
+    "Dairy & Desserts",
+    "Raw Vegetables & Salad",
+    "Bakery / Packaged Breads",
+]
+
+FOOD_ITEMS_MAP = {
+    "Cooked Curry / Gravy": [
+        "Paneer Butter Masala", "Mixed Veg Curry",
+        "Chole Gravy", "Dum Aloo", "Kadhai Paneer",
+    ],
+    "Cooked Rice / Biryani": [
+        "Jeera Rice", "Veg Biryani", "Pulao",
+        "Khichdi", "Steamed Rice",
+    ],
+    "Dal & Lentils": [
+        "Dal Makhani", "Dal Tadka", "Sambhar",
+        "Yellow Dal", "Chana Dal",
+    ],
+    "Indian Breads (Roti/Naan)": [
+        "Tandoori Roti", "Phulka Chapati",
+        "Butter Naan", "Paratha", "Puri",
+    ],
+    "Fried Items (Samosa/Puri)": [
+        "Aloo Samosa", "Veg Cutlet", "Pakoda",
+        "Kachori", "Spring Roll",
+    ],
+    "Dairy & Desserts": [
+        "Gulab Jamun in Chashni", "Rasgulla",
+        "Kheer / Payasam", "Paneer Tikka", "Sweet Lassi",
+    ],
+    "Raw Vegetables & Salad": [
+        "Cucumber Tomato Salad", "Sprouts Salad",
+        "Fruit Chaat", "Boiled Corn Salad",
+    ],
+    "Bakery / Packaged Breads": [
+        "White Bread Loaf", "Pav Buns",
+        "Dinner Rolls", "Fruit Buns",
+    ],
+}
+
+PACKAGING_TYPES = [
+    "Open Container",
+    "Covered Degchi / Pot",
+    "Aluminium Foil Wrap",
+    "Airtight Food Box",
+]
+
+STORAGE_METHODS = [
+    "Ambient Room Temp",
+    "Refrigerated (4-7C)",
+    "Insulated Hot Pot (>55C)",
+]
+
+SENSITIVITY = {
+    "Dairy & Desserts": 1.6,
+    "Cooked Curry / Gravy": 1.4,
+    "Dal & Lentils": 1.3,
+    "Cooked Rice / Biryani": 1.2,
+    "Raw Vegetables & Salad": 1.1,
+    "Indian Breads (Roti/Naan)": 0.8,
+    "Fried Items (Samosa/Puri)": 0.7,
+    "Bakery / Packaged Breads": 0.5,
+}
+
+PACKAGING_PROTECTION = {
+    "Open Container": 0.60,
+    "Covered Degchi / Pot": 0.85,
+    "Aluminium Foil Wrap": 1.05,
+    "Airtight Food Box": 1.30,
+}
+
+
+def generate_food_shelf_life_dataset(
+    n_samples=N_SAMPLES,
+    random_seed=RANDOM_SEED,
+):
+    rng = np.random.default_rng(random_seed)
+
+    category = rng.choice(
+        CATEGORIES,
+        size=n_samples,
+        p=[0.20, 0.18, 0.16, 0.14, 0.10, 0.08, 0.06, 0.08],
+    )
+
+    packaging = rng.choice(
+        PACKAGING_TYPES,
+        size=n_samples,
+        p=[0.25, 0.35, 0.25, 0.15],
+    )
+
+    storage = rng.choice(
+        STORAGE_METHODS,
+        size=n_samples,
+        p=[0.60, 0.25, 0.15],
+    )
+
+    temperature = np.empty(n_samples)
+    ambient = storage == "Ambient Room Temp"
+    refrigerated = storage == "Refrigerated (4-7C)"
+    insulated = storage == "Insulated Hot Pot (>55C)"
+
+    # Variable environmental conditions
+    temperature[ambient] = rng.uniform(
+        22.0, 39.0, ambient.sum()
+    )
+    temperature[refrigerated] = rng.uniform(
+        3.0, 7.5, refrigerated.sum()
+    )
+    temperature[insulated] = rng.uniform(
+        55.0, 65.0, insulated.sum()
+    )
+
+    humidity = rng.uniform(30.0, 80.0, n_samples)
+    hours_since_prep = rng.uniform(0.5, 12.0, n_samples)
+
+    sensitivity = np.array(
+        [SENSITIVITY[c] for c in category]
+    )
+
+    protection = np.array(
+        [PACKAGING_PROTECTION[p] for p in packaging]
+    )
+
+    moisture_map = {
+        "Cooked Curry / Gravy": 3,
+        "Cooked Rice / Biryani": 2,
+        "Dal & Lentils": 3,
+        "Indian Breads (Roti/Naan)": 1,
+        "Fried Items (Samosa/Puri)": 1,
+        "Dairy & Desserts": 3,
+        "Raw Vegetables & Salad": 2,
+        "Bakery / Packaged Breads": 1,
     }
 
-    packaging_types = ['Open Container', 'Covered Degchi / Pot', 'Aluminium Foil Wrap', 'Airtight Food Box']
-    storage_methods = ['Ambient Room Temp', 'Refrigerated (4-7C)', 'Insulated Hot Pot (>55C)']
+    moisture = np.array(
+        [moisture_map[c] for c in category]
+    )
 
-    rows = []
+    # Synthetic shelf-life assumptions.
+    # These are simulation rules, not validated food-safety limits.
+    temp_penalty = np.maximum(
+        1.0, (temperature - 20.0) / 7.0
+    )
 
-    for i in range(n_samples):
-        cat = np.random.choice(categories, p=[0.20, 0.18, 0.16, 0.14, 0.10, 0.08, 0.06, 0.08])
-        food_name = np.random.choice(food_items_map[cat])
-        packaging = np.random.choice(packaging_types, p=[0.25, 0.35, 0.25, 0.15])
-        storage = np.random.choice(storage_methods, p=[0.60, 0.25, 0.15])
+    base_safe_hours = np.select(
+        [refrigerated, insulated],
+        [28.0 / sensitivity, 16.0 / sensitivity],
+        default=13.0 / (sensitivity * temp_penalty),
+    )
 
-        # Temperature in Celsius: Ambient (24 to 38 C in Jaipur), Refrigerated (3 to 8 C), Insulated (50 to 65 C)
-        if storage == 'Refrigerated (4-7C)':
-            temperature = np.random.uniform(3.0, 7.5)
-        elif storage == 'Insulated Hot Pot (>55C)':
-            temperature = np.random.uniform(50.0, 65.0)
-        else:
-            temperature = np.random.uniform(22.0, 39.0)
+    # Small humidity effect, deliberately bounded
+    humidity_factor = np.clip(
+        1.0 - (humidity - 50.0) * 0.002,
+        0.90,
+        1.10,
+    )
 
-        # Ambient Humidity percentage (30% to 80%)
-        humidity = np.random.uniform(30.0, 80.0)
+    total_safe_hours = (
+        base_safe_hours * protection * humidity_factor
+    )
 
-        # Elapsed hours since food was prepared in the kitchen (0.5 to 12.0 hours)
-        hours_since_prep = np.random.uniform(0.5, 12.0)
+    # Biological variation represented by synthetic noise
+    noise = rng.normal(0.0, 0.4, n_samples)
+    total_safe_hours = np.maximum(
+        2.0, total_safe_hours + noise
+    )
 
-        # Moisture content rating (1 = low, 2 = medium, 3 = high)
-        if cat in ['Cooked Curry / Gravy', 'Dal & Lentils', 'Dairy & Desserts']:
-            moisture_score = 3
-        elif cat in ['Cooked Rice / Biryani', 'Raw Vegetables & Salad']:
-            moisture_score = 2
-        else:
-            moisture_score = 1
+    remaining_hours = np.clip(
+        total_safe_hours - hours_since_prep,
+        0.0,
+        24.0,
+    )
 
-        # Spoilage sensitivity base parameter
-        sensitivity = {
-            'Dairy & Desserts': 1.6,
-            'Cooked Curry / Gravy': 1.4,
-            'Dal & Lentils': 1.3,
-            'Cooked Rice / Biryani': 1.2,
-            'Raw Vegetables & Salad': 1.1,
-            'Indian Breads (Roti/Naan)': 0.8,
-            'Fried Items (Samosa/Puri)': 0.7,
-            'Bakery / Packaged Breads': 0.5
-        }[cat]
+    safety_score = np.clip(
+        (remaining_hours / total_safe_hours) * 100.0,
+        0.0,
+        100.0,
+    )
 
-        # Packaging protection factor
-        pkg_protection = {
-            'Open Container': 0.6,
-            'Covered Degchi / Pot': 0.85,
-            'Aluminium Foil Wrap': 1.05,
-            'Airtight Food Box': 1.30
-        }[packaging]
+    safe_for_donation = (
+        (remaining_hours >= 3.0) &
+        (safety_score >= 40.0)
+    ).astype(int)
 
-        # Max safe shelf-life model (ground truth physics based)
-        if storage == 'Refrigerated (4-7C)':
-            base_safe_hours = 28.0 / sensitivity
-        elif storage == 'Insulated Hot Pot (>55C)':
-            base_safe_hours = 16.0 / sensitivity
-        else:
-            # Ambient temperature degradation: higher temp accelerates microbial growth
-            temp_penalty = max(1.0, (temperature - 20.0) / 7.0)
-            base_safe_hours = (13.0 / (sensitivity * temp_penalty))
+    food_names = [
+        rng.choice(FOOD_ITEMS_MAP[c])
+        for c in category
+    ]
 
-        total_safe_hours = base_safe_hours * pkg_protection
+    df = pd.DataFrame({
+        "donation_id": [
+            f"CK-ML-{i + 10001}"
+            for i in range(n_samples)
+        ],
+        "food_name": food_names,
+        "category": category,
+        "storage_condition": storage,
+        "packaging_type": packaging,
+        "temperature_c": np.round(temperature, 1),
+        "humidity_percent": np.round(humidity, 1),
+        "hours_since_cooking": np.round(
+            hours_since_prep, 1
+        ),
+        "moisture_level": moisture,
+        "spoilage_sensitivity": sensitivity,
+        "remaining_shelf_life_hours": np.round(
+            remaining_hours, 2
+        ),
+        "safety_score": np.round(safety_score, 1),
+        "safe_for_donation": safe_for_donation,
+    })
 
-        # Noise to mimic real-world biological variations
-        noise = np.random.normal(0, 0.4)
-        total_safe_hours = max(2.0, total_safe_hours + noise)
-
-        # Remaining shelf-life = total safe hours - elapsed hours
-        remaining_hours = total_safe_hours - hours_since_prep
-        remaining_hours = round(float(np.clip(remaining_hours, 0.0, 24.0)), 2)
-
-        # Overall safety score (0 to 100%)
-        safety_score = round(float(np.clip((remaining_hours / total_safe_hours) * 100.0, 0.0, 100.0)), 1)
-        safe_to_donate = 1 if remaining_hours >= 3.0 and safety_score >= 40.0 else 0
-
-        rows.append({
-            'donation_id': f'CK-ML-{i+10001}',
-            'food_name': food_name,
-            'category': cat,
-            'storage_condition': storage,
-            'packaging_type': packaging,
-            'temperature_c': round(float(temperature), 1),
-            'humidity_percent': round(float(humidity), 1),
-            'hours_since_cooking': round(float(hours_since_prep), 1),
-            'moisture_level': moisture_score,
-            'spoilage_sensitivity': sensitivity,
-            'remaining_shelf_life_hours': remaining_hours,
-            'safety_score': safety_score,
-            'safe_for_donation': safe_to_donate
-        })
-
-    df = pd.DataFrame(rows)
     return df
+
 
 def clean_and_process_dataset(raw_df):
-    """
-    Cleans raw data, handles outliers/missing values, and structures features for modeling.
-    """
     df = raw_df.copy()
 
-    # Verify no NaN values
-    df = df.dropna()
+    df = df.dropna().drop_duplicates(
+        subset=["donation_id"]
+    )
 
-    # Clip numerical outliers to realistic boundaries
-    df['temperature_c'] = df['temperature_c'].clip(0.0, 70.0)
-    df['humidity_percent'] = df['humidity_percent'].clip(10.0, 100.0)
-    df['hours_since_cooking'] = df['hours_since_cooking'].clip(0.1, 24.0)
+    df["temperature_c"] = df["temperature_c"].clip(
+        0.0, 70.0
+    )
+    df["humidity_percent"] = df["humidity_percent"].clip(
+        10.0, 100.0
+    )
+    df["hours_since_cooking"] = (
+        df["hours_since_cooking"].clip(0.1, 24.0)
+    )
 
     return df
 
-if __name__ == '__main__':
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    raw_path = os.path.join(base_dir, 'data', 'raw', 'carekart_food_shelf_life_raw.csv')
-    processed_path = os.path.join(base_dir, 'data', 'processed', 'carekart_food_cleaned.csv')
 
-    print("[Sprint 1] Generating and Collecting Food Shelf-Life Dataset...")
-    raw_data = generate_food_shelf_life_dataset(n_samples=3000, random_seed=42)
+if __name__ == "__main__":
+    base_dir = os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__))
+    )
+
+    raw_dir = os.path.join(base_dir, "data", "raw")
+    processed_dir = os.path.join(
+        base_dir, "data", "processed"
+    )
+
+    os.makedirs(raw_dir, exist_ok=True)
+    os.makedirs(processed_dir, exist_ok=True)
+
+    raw_path = os.path.join(
+        raw_dir, "carekart_food_shelf_life_raw.csv"
+    )
+    processed_path = os.path.join(
+        processed_dir, "carekart_food_cleaned.csv"
+    )
+
+    print("Generating 100,000 synthetic food records...")
+
+    raw_data = generate_food_shelf_life_dataset(
+        n_samples=100_000,
+        random_seed=42,
+    )
+
     raw_data.to_csv(raw_path, index=False)
-    print(f" Saved Raw Dataset to: {raw_path} ({len(raw_data)} samples)")
+    print(f"Raw dataset saved: {raw_path}")
+    print(f"Raw records: {len(raw_data):,}")
 
-    print("[Sprint 1] Cleaning & Preprocessing Dataset...")
+    print("Cleaning and preprocessing dataset...")
+
     cleaned_data = clean_and_process_dataset(raw_data)
     cleaned_data.to_csv(processed_path, index=False)
-    print(f" Saved Cleaned Dataset to: {processed_path}")
-    print("\nDataset Summary Preview:")
-    print(cleaned_data[['category', 'storage_condition', 'temperature_c', 'remaining_shelf_life_hours', 'safe_for_donation']].head(5))
+
+    print(f"Processed dataset saved: {processed_path}")
+    print(f"Processed records: {len(cleaned_data):,}")
+
+    print("\nDataset preview:")
+    print(
+        cleaned_data[
+            [
+                "food_name",
+                "category",
+                "temperature_c",
+                "hours_since_cooking",
+                "remaining_shelf_life_hours",
+                "safe_for_donation",
+            ]
+        ].head()
+    )
+
+    print("\nDonation label distribution:")
+    print(
+        cleaned_data["safe_for_donation"]
+        .value_counts(normalize=True)
+        .mul(100)
+        .round(2)
+        .rename("percentage")
+    )
