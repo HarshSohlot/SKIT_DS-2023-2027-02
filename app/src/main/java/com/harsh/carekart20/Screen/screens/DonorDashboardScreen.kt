@@ -175,7 +175,7 @@ fun DonorDashboardScreen(
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             Column {
                                 Text(
@@ -186,19 +186,6 @@ fun DonorDashboardScreen(
                                 )
                                 Text(
                                     text = "Meals Shared",
-                                    fontSize = 12.sp,
-                                    color = SurfaceWhite.copy(alpha = 0.8f)
-                                )
-                            }
-                            Column {
-                                Text(
-                                    text = "340 kg",
-                                    fontSize = 28.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = SurfaceWhite
-                                )
-                                Text(
-                                    text = "CO2 Prevented",
                                     fontSize = 12.sp,
                                     color = SurfaceWhite.copy(alpha = 0.8f)
                                 )
