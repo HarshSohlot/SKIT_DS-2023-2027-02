@@ -15,24 +15,32 @@ import {
   Sparkles,
   HeartHandshake,
   Layers,
-  Leaf
+  Leaf,
+  MapPin,
+  ClipboardList,
+  Compass
 } from 'lucide-react';
 
 /**
- * Reusable Dashboard Layout Shell (Sprint 3 Architecture)
- * Provides sidebar navigation, responsive drawer, top bar, and role badges.
+ * Reusable Dashboard Layout Shell (Sprint 3 Architecture - 75% Milestone)
+ * Provides sidebar navigation, responsive drawer, top bar, and role badges for both DONOR and RECEIVER.
  */
 export const DashboardLayout = ({ 
   children, 
   activeTab, 
   onTabChange, 
-  unreadClaimsCount = 0 
+  unreadClaimsCount = 0,
+  customNavItems,
+  portalTitle = "Kartavya's Web Dashboard Portal",
+  portalSubtitle = "Sprint 3 Milestone: Food Redistribution & Receiver Control Center",
+  sprintBadgeText = "Sprint 3: 75% Milestone"
 }) => {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
-  const navItems = [
+  // Default Donor nav items if customNavItems not provided
+  const defaultNavItems = [
     {
       id: 'overview',
       label: 'Overview & Listings',
@@ -59,6 +67,10 @@ export const DashboardLayout = ({
     }
   ];
 
+  const navItems = customNavItems || defaultNavItems;
+
+  const isReceiver = user?.role === 'RECEIVER';
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
       
@@ -80,15 +92,19 @@ export const DashboardLayout = ({
           {/* Brand & Sprint Indicator */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-100">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-xs">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-xs ${
+                isReceiver 
+                  ? 'bg-gradient-to-tr from-amber-600 to-orange-500' 
+                  : 'bg-gradient-to-tr from-emerald-600 to-teal-500'
+              }`}>
                 <HeartHandshake className="w-5 h-5" />
               </div>
               <div>
                 <span className="font-black text-slate-900 text-base tracking-tight block">
-                  Care<span className="text-emerald-600">Kart</span>
+                  Care<span className={isReceiver ? "text-amber-600" : "text-emerald-600"}>Kart</span>
                 </span>
                 <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">
-                  Web Portal v1.0
+                  Web Portal v1.2
                 </span>
               </div>
             </Link>
@@ -103,15 +119,23 @@ export const DashboardLayout = ({
 
           {/* User Quick Identity */}
           <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shrink-0">
+            <div className={`w-10 h-10 rounded-xl font-bold flex items-center justify-center shrink-0 ${
+              isReceiver 
+                ? 'bg-amber-100 text-amber-800' 
+                : 'bg-emerald-100 text-emerald-800'
+            }`}>
               {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
             </div>
             <div className="truncate">
               <span className="font-bold text-xs text-slate-800 block truncate">
-                {user?.name || 'Registered Donor'}
+                {user?.name || (isReceiver ? 'Asha Food Relief NGO' : 'Registered Donor')}
               </span>
-              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-0.5">
-                {user?.role || 'DONOR'}
+              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full inline-block mt-0.5 ${
+                isReceiver
+                  ? 'bg-amber-100 text-amber-800'
+                  : 'bg-emerald-50 text-emerald-700'
+              }`}>
+                {user?.role || 'RECEIVER'}
               </span>
             </div>
           </div>
@@ -133,7 +157,9 @@ export const DashboardLayout = ({
                   }}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-emerald-600 text-white shadow-xs shadow-emerald-700/20'
+                      ? isReceiver
+                        ? 'bg-amber-600 text-white shadow-xs shadow-amber-700/20'
+                        : 'bg-emerald-600 text-white shadow-xs shadow-emerald-700/20'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
@@ -170,7 +196,7 @@ export const DashboardLayout = ({
             </div>
             <div className="flex items-center justify-between text-slate-400 font-semibold">
               <span>Sprint Task:</span>
-              <span className="text-emerald-700 font-bold">Sprint 3 (50%)</span>
+              <span className="text-amber-700 font-bold">Sprint 3 (75%)</span>
             </div>
           </div>
 
@@ -198,19 +224,25 @@ export const DashboardLayout = ({
             </button>
             <div className="hidden sm:block">
               <h2 className="text-sm font-black text-slate-800">
-                Kartavya's Web Dashboard Portal
+                {portalTitle}
               </h2>
               <p className="text-[11px] text-slate-500">
-                Sprint 3 Milestone: Core Dashboard Layout & Donor Redistribution Control
+                {portalSubtitle}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* 50% Sprint Badge */}
-            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Sprint 3: 50% Milestone</span>
+            {/* 75% Sprint Badge */}
+            <span className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+              isReceiver 
+                ? 'bg-amber-50 text-amber-800 border-amber-200' 
+                : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+            }`}>
+              <span className={`w-2 h-2 rounded-full animate-pulse ${
+                isReceiver ? 'bg-amber-500' : 'bg-emerald-500'
+              }`} />
+              <span>{sprintBadgeText}</span>
             </span>
 
             {/* Quick Profile Link */}
