@@ -9,7 +9,7 @@ import pandas as pd
 # Sprint 1: Data Collection and Preprocessing
 # ============================================================
 
-N_SAMPLES = 100_000
+N_SAMPLES = 6_000
 RANDOM_SEED = 42
 
 CATEGORIES = [
@@ -89,11 +89,23 @@ PACKAGING_PROTECTION = {
     "Airtight Food Box": 1.30,
 }
 
+MOISTURE_MAP = {
+    "Cooked Curry / Gravy": 3,
+    "Cooked Rice / Biryani": 2,
+    "Dal & Lentils": 3,
+    "Indian Breads (Roti/Naan)": 1,
+    "Fried Items (Samosa/Puri)": 1,
+    "Dairy & Desserts": 3,
+    "Raw Vegetables & Salad": 2,
+    "Bakery / Packaged Breads": 1,
+}
+
 
 def generate_food_shelf_life_dataset(
     n_samples=N_SAMPLES,
     random_seed=RANDOM_SEED,
 ):
+    """Generate synthetic food shelf-life records."""
     rng = np.random.default_rng(random_seed)
 
     category = rng.choice(
@@ -114,12 +126,13 @@ def generate_food_shelf_life_dataset(
         p=[0.60, 0.25, 0.15],
     )
 
+    # Generate temperatures based on storage condition.
     temperature = np.empty(n_samples)
+
     ambient = storage == "Ambient Room Temp"
     refrigerated = storage == "Refrigerated (4-7C)"
     insulated = storage == "Insulated Hot Pot (>55C)"
 
-    # Variable environmental conditions
     temperature[ambient] = rng.uniform(
         22.0, 39.0, ambient.sum()
     )
@@ -133,42 +146,35 @@ def generate_food_shelf_life_dataset(
     humidity = rng.uniform(30.0, 80.0, n_samples)
     hours_since_prep = rng.uniform(0.5, 12.0, n_samples)
 
-    sensitivity = np.array(
-        [SENSITIVITY[c] for c in category]
-    )
+    sensitivity = np.array([
+        SENSITIVITY[c] for c in category
+    ])
 
-    protection = np.array(
-        [PACKAGING_PROTECTION[p] for p in packaging]
-    )
+    protection = np.array([
+        PACKAGING_PROTECTION[p] for p in packaging
+    ])
 
-    moisture_map = {
-        "Cooked Curry / Gravy": 3,
-        "Cooked Rice / Biryani": 2,
-        "Dal & Lentils": 3,
-        "Indian Breads (Roti/Naan)": 1,
-        "Fried Items (Samosa/Puri)": 1,
-        "Dairy & Desserts": 3,
-        "Raw Vegetables & Salad": 2,
-        "Bakery / Packaged Breads": 1,
-    }
+    moisture = np.array([
+        MOISTURE_MAP[c] for c in category
+    ])
 
-    moisture = np.array(
-        [moisture_map[c] for c in category]
-    )
-
-    # Synthetic shelf-life assumptions.
-    # These are simulation rules, not validated food-safety limits.
+    # Synthetic shelf-life simulation rules.
+    # These are assumptions, not validated safety limits.
     temp_penalty = np.maximum(
-        1.0, (temperature - 20.0) / 7.0
+        1.0,
+        (temperature - 20.0) / 7.0,
     )
 
     base_safe_hours = np.select(
         [refrigerated, insulated],
-        [28.0 / sensitivity, 16.0 / sensitivity],
+        [
+            28.0 / sensitivity,
+            16.0 / sensitivity,
+        ],
         default=13.0 / (sensitivity * temp_penalty),
     )
 
-    # Small humidity effect, deliberately bounded
+    # Apply a bounded humidity adjustment.
     humidity_factor = np.clip(
         1.0 - (humidity - 50.0) * 0.002,
         0.90,
@@ -179,10 +185,12 @@ def generate_food_shelf_life_dataset(
         base_safe_hours * protection * humidity_factor
     )
 
-    # Biological variation represented by synthetic noise
+    # Add random variation to simulated shelf life.
     noise = rng.normal(0.0, 0.4, n_samples)
+
     total_safe_hours = np.maximum(
-        2.0, total_safe_hours + noise
+        2.0,
+        total_safe_hours + noise,
     )
 
     remaining_hours = np.clip(
@@ -198,8 +206,8 @@ def generate_food_shelf_life_dataset(
     )
 
     safe_for_donation = (
-        (remaining_hours >= 3.0) &
-        (safety_score >= 40.0)
+        (remaining_hours >= 3.0)
+        & (safety_score >= 40.0)
     ).astype(int)
 
     food_names = [
@@ -234,11 +242,11 @@ def generate_food_shelf_life_dataset(
 
 
 def clean_and_process_dataset(raw_df):
+    """Clean missing records, duplicate IDs and numeric ranges."""
     df = raw_df.copy()
 
-    df = df.dropna().drop_duplicates(
-        subset=["donation_id"]
-    )
+    df = df.dropna()
+    df = df.drop_duplicates(subset=["donation_id"])
 
     df["temperature_c"] = df["temperature_c"].clip(
         0.0, 70.0
@@ -273,14 +281,15 @@ if __name__ == "__main__":
         processed_dir, "carekart_food_cleaned.csv"
     )
 
-    print("Generating 100,000 synthetic food records...")
+    print("Generating 6,000 synthetic food records...")
 
     raw_data = generate_food_shelf_life_dataset(
-        n_samples=100_000,
+        n_samples=6_000,
         random_seed=42,
     )
 
     raw_data.to_csv(raw_path, index=False)
+
     print(f"Raw dataset saved: {raw_path}")
     print(f"Raw records: {len(raw_data):,}")
 
