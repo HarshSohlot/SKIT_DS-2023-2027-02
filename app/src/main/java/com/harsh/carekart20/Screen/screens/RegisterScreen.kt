@@ -38,10 +38,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.harsh.carekart20.Model.Dto.DonorDto
+import com.harsh.carekart20.Model.Dto.ReceiverDto
+import com.harsh.carekart20.Model.Enum.DonorType
+import com.harsh.carekart20.Model.Enum.ReceiverType
 import com.harsh.carekart20.Model.UserRole
 import com.harsh.carekart20.Screen.Components.CareKartButton
 import com.harsh.carekart20.Screen.Components.CareKartTextField
 import com.harsh.carekart20.Screen.Components.RoleSelectorTabs
+import com.harsh.carekart20.Screen.Components.EnumDropdown
 import com.harsh.carekart20.ui.theme.EmeraldPrimary
 import com.harsh.carekart20.ui.theme.SurfaceWhite
 import com.harsh.carekart20.ui.theme.TextPrimary
@@ -63,6 +68,15 @@ fun RegisterScreen(
     var agreedToTerms by remember { mutableStateOf(true) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var latitude by remember { mutableStateOf("") }
+    var longitude by remember { mutableStateOf("") }
+    var landmark by remember { mutableStateOf("") }
+
+    var registrationNumber by remember { mutableStateOf("") }
+    var ownerName by remember { mutableStateOf("") }
+
+    var donorType by remember { mutableStateOf(DonorType.INDIVIDUAL) }
+    var receiverType by remember { mutableStateOf(ReceiverType.NGO) }
 
     val scrollState = rememberScrollState()
 
@@ -145,7 +159,7 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Address (Jaipur)
+        // Address
         CareKartTextField(
             value = address,
             onValueChange = { address = it },
@@ -155,6 +169,78 @@ fun RegisterScreen(
         )
 
         Spacer(modifier = Modifier.height(14.dp))
+
+        CareKartTextField(
+            value = latitude,
+            onValueChange = { latitude = it },
+            label = "Latitude",
+            placeholder = "e.g. 26.9124",
+            leadingIcon = Icons.Default.LocationOn,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal
+            )
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        CareKartTextField(
+            value = longitude,
+            onValueChange = { longitude = it },
+            label = "Longitude",
+            placeholder = "e.g. 75.7873",
+            leadingIcon = Icons.Default.LocationOn,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal
+            )
+        )
+
+        if (selectedRole == UserRole.DONOR) {
+            Spacer(modifier = Modifier.height(14.dp))
+
+            CareKartTextField(
+                value = landmark,
+                onValueChange = { landmark = it },
+                label = "Landmark",
+                placeholder = "Nearby landmark",
+                leadingIcon = Icons.Default.LocationOn
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            CareKartTextField(
+                value = ownerName,
+                onValueChange = { ownerName = it },
+                label = "Owner Name",
+                placeholder = "Restaurant or mess owner"
+            )
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        if (selectedRole == UserRole.DONOR) {
+            EnumDropdown(
+                value = donorType,
+                options = DonorType.values().toList(),
+                label = "Donor Type",
+                onValueChange = { donorType = it }
+            )
+        } else if (selectedRole == UserRole.RECEIVER) {
+            EnumDropdown(
+                value = receiverType,
+                options = ReceiverType.values().toList(),
+                label = "Receiver Type",
+                onValueChange = { receiverType = it }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        CareKartTextField(
+            value = registrationNumber,
+            onValueChange = { registrationNumber = it },
+            label = "Registration Number",
+            placeholder = "Organization registration number"
+        )
 
         // Password
         CareKartTextField(
@@ -223,8 +309,58 @@ fun RegisterScreen(
                     errorMessage = "Passwords do not match"
                     return@CareKartButton
                 }
-                isLoading = true
+
+                val generatedId = java.util.UUID.randomUUID().toString()
+
+                when (selectedRole) {
+                    UserRole.DONOR -> {
+                        val donorDto = DonorDto(
+                            donorId = generatedId,
+                            password = password,
+                            donorName = name,
+                            phoneNumber = phone,
+                            email = email,
+                            latitude = latitude,
+                            longitude = longitude,
+                            address = address,
+                            landmark = landmark,
+                            donorType = donorType,
+                            registrationNumber = registrationNumber,
+                            ownerName = ownerName
+                        )
+
+                        // Backend integration will be added later.
+                        println("Donor registration data: $donorDto")
+                    }
+
+                    UserRole.RECEIVER -> {
+                        val receiverDto = ReceiverDto(
+                            receiverId = generatedId,
+                            password = password,
+                            receiverName = name,
+                            phoneNumber = phone,
+                            email = email,
+                            latitude = latitude,
+                            longitude = longitude,
+                            address = address,
+                            receiverType = receiverType,
+                            registrationNumber = registrationNumber,
+                            organizationName = name
+                        )
+
+                        // Backend integration will be added later.
+                        println("Receiver registration data: $receiverDto")
+                    }
+                    else -> {
+                        errorMessage = "Admin registration is not supported."
+                        isLoading = false
+                        return@CareKartButton
+                    }
+                }
+
+                isLoading = false
                 onRegisterSuccess(selectedRole)
+
             }
         )
 
