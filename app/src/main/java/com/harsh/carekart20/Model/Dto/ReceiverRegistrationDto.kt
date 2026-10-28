@@ -2,7 +2,7 @@ package com.harsh.carekart20.Model.Dto
 
 import com.harsh.carekart20.Model.Enum.ReceiverType
 
-data class ReceiverDto(
+data class ReceiverRegistrationDto(
     val receiverId: String,
     val password : String,
     val receiverName: String,

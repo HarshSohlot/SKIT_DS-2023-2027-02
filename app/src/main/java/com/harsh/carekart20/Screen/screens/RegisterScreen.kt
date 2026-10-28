@@ -38,8 +38,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.harsh.carekart20.Model.Dto.DonorDto
-import com.harsh.carekart20.Model.Dto.ReceiverDto
+import com.harsh.carekart20.Model.Dto.DonorRegistrationDto
+import com.harsh.carekart20.Model.Dto.ReceiverRegistrationDto
 import com.harsh.carekart20.Model.Enum.DonorType
 import com.harsh.carekart20.Model.Enum.ReceiverType
 import com.harsh.carekart20.Model.UserRole
@@ -314,7 +314,7 @@ fun RegisterScreen(
 
                 when (selectedRole) {
                     UserRole.DONOR -> {
-                        val donorDto = DonorDto(
+                        val donorRegistrationDto = DonorRegistrationDto(
                             donorId = generatedId,
                             password = password,
                             donorName = name,
@@ -330,11 +330,11 @@ fun RegisterScreen(
                         )
 
                         // Backend integration will be added later.
-                        println("Donor registration data: $donorDto")
+                        println("Donor registration data: $donorRegistrationDto")
                     }
 
                     UserRole.RECEIVER -> {
-                        val receiverDto = ReceiverDto(
+                        val receiverRegistrationDto = ReceiverRegistrationDto(
                             receiverId = generatedId,
                             password = password,
                             receiverName = name,
@@ -349,7 +349,7 @@ fun RegisterScreen(
                         )
 
                         // Backend integration will be added later.
-                        println("Receiver registration data: $receiverDto")
+                        println("Receiver registration data: $receiverRegistrationDto")
                     }
                     else -> {
                         errorMessage = "Admin registration is not supported."
