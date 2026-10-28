@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.harsh.carekart20.Model.UserRole
 import com.harsh.carekart20.Screen.screens.DonorDashboardScreen
+import com.harsh.carekart20.Screen.screens.ForgotPasswordScreen
 import com.harsh.carekart20.Screen.screens.LoginScreen
 import com.harsh.carekart20.Screen.screens.ProfileScreen
 import com.harsh.carekart20.Screen.screens.ReceiverDashboardScreen
@@ -60,6 +61,9 @@ fun CareKartNavGraph(
                             popUpTo(Screen.Welcome.route) { inclusive = true }
                         }
                     }
+                },
+                onNavigateToForgotPassword = {
+                    navController.navigate(Screen.ForgotPassword.route)
                 }
             )
         }
@@ -117,6 +121,19 @@ fun CareKartNavGraph(
                     navController.navigate(Screen.Welcome.route) {
                         popUpTo(0) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        //7. Forgot password screen
+        composable(route = Screen.ForgotPassword.route) {
+            ForgotPasswordScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onSubmit = {
+                    userId , role ->
+                    // todo : Api call
                 }
             )
         }

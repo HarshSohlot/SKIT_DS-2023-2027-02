@@ -2,7 +2,7 @@ package com.harsh.carekart20.Model.Dto
 
 import com.harsh.carekart20.Model.Enum.DonorType
 
-data class DonorDto(
+data class DonorRegistrationDto(
     val donorId: String,
     val password : String,
     val donorName: String,

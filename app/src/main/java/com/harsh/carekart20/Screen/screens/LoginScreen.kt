@@ -17,7 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -39,9 +39,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.harsh.carekart20.Model.Dto.LoginRequestDto
 import com.harsh.carekart20.Model.UserRole
 import com.harsh.carekart20.Screen.Components.CareKartButton
 import com.harsh.carekart20.Screen.Components.CareKartTextField
@@ -56,10 +56,11 @@ import com.harsh.carekart20.ui.theme.TextSecondary
 fun LoginScreen(
     onNavigateBack: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    onLoginSuccess: (UserRole) -> Unit
+    onLoginSuccess: (UserRole) -> Unit,
+    onNavigateToForgotPassword : ()->Unit
 ) {
     var selectedRole by remember { mutableStateOf(UserRole.DONOR) }
-    var email by remember { mutableStateOf("") }
+    var userId by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
@@ -88,7 +89,6 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Title and Subtitle (matching Slide 5 Screen 2)
         Text(
             text = "Welcome Back",
             fontSize = 28.sp,
@@ -123,7 +123,7 @@ fun LoginScreen(
         ) {
             Column {
                 Text(
-                    text = "College Viva Demo: Quick Fill",
+                    text = "Demo: Quick Fill",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     color = EmeraldPrimary
@@ -136,8 +136,8 @@ fun LoginScreen(
                     Button(
                         onClick = {
                             selectedRole = UserRole.DONOR
-                            email = "donor@carekart.org"
-                            password = "donor123"
+                            userId = "donor101"
+                            password = "donor101"
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary),
                         shape = RoundedCornerShape(8.dp),
@@ -149,14 +149,14 @@ fun LoginScreen(
                     Button(
                         onClick = {
                             selectedRole = UserRole.RECEIVER
-                            email = "receiver@carekart.org"
-                            password = "ngo123"
+                            userId = "receiver101"
+                            password = "receiver101"
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD97706)),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.weight(1f).height(34.dp)
                     ) {
-                        Text("NGO Demo", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text("Receiver Demo", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -166,15 +166,14 @@ fun LoginScreen(
 
         // Email Text Field
         CareKartTextField(
-            value = email,
+            value = userId,
             onValueChange = {
-                email = it
+                userId = it
                 errorMessage = null
             },
-            label = "Email",
-            placeholder = if (selectedRole == UserRole.DONOR) "donor@carekart.org" else "ngo@carekart.org",
-            leadingIcon = Icons.Default.Email,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            label = "UserId",
+            placeholder = if (selectedRole == UserRole.DONOR) "donor101" else "receiver101",
+            leadingIcon = Icons.Default.AccountCircle,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -214,7 +213,9 @@ fun LoginScreen(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = EmeraldPrimary,
-                modifier = Modifier.clickable { /* Handle forgot password */ }
+                modifier = Modifier.clickable {
+                    onNavigateToForgotPassword()
+                }
             )
         }
 
@@ -234,12 +235,38 @@ fun LoginScreen(
             text = "Login",
             isLoading = isLoading,
             onClick = {
-                if (email.isBlank() || password.isBlank()) {
+                if (userId.isBlank() || password.isBlank()) {
                     errorMessage = "Please enter email and password"
                     return@CareKartButton
                 }
                 isLoading = true
-                // Simulate JWT token issuance & authentication (Sprint 2 task)
+                // Login api call to backend
+                when(selectedRole){
+                    UserRole.DONOR -> {
+                        val loginRequest = LoginRequestDto(
+                            userId = userId,
+                            password = password,
+                            userType = "DONOR"
+                        )
+                        // backend api integration
+                    }
+                    UserRole.RECEIVER -> {
+                        val loginRequest = LoginRequestDto(
+                            userId = userId,
+                            password = password,
+                            userType = "RECEIVER"
+                        )
+                        // backend api integration
+                    }
+                    UserRole.ADMIN -> {
+                        val loginRequest = LoginRequestDto(
+                            userId = userId,
+                            password = password,
+                            userType = "ADMIN"
+                        )
+                        // backend api integration after admin registration
+                    }
+                }
                 onLoginSuccess(selectedRole)
             }
         )
