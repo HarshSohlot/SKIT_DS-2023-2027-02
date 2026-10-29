@@ -80,6 +80,11 @@ fun RegisterScreen(
 
     val scrollState = rememberScrollState()
 
+    val showHiddenFieldsForDonor =
+        selectedRole == UserRole.DONOR && donorType != DonorType.INDIVIDUAL
+    val showHiddenFieldsForReceiver =
+        selectedRole == UserRole.RECEIVER && receiverType != ReceiverType.INDIVIDUAL
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -193,10 +198,9 @@ fun RegisterScreen(
                 keyboardType = KeyboardType.Decimal
             )
         )
+        Spacer(modifier = Modifier.height(14.dp))
 
         if (selectedRole == UserRole.DONOR) {
-            Spacer(modifier = Modifier.height(14.dp))
-
             CareKartTextField(
                 value = landmark,
                 onValueChange = { landmark = it },
@@ -206,16 +210,7 @@ fun RegisterScreen(
             )
 
             Spacer(modifier = Modifier.height(14.dp))
-
-            CareKartTextField(
-                value = ownerName,
-                onValueChange = { ownerName = it },
-                label = "Owner Name",
-                placeholder = "Restaurant or mess owner"
-            )
         }
-
-        Spacer(modifier = Modifier.height(14.dp))
 
         if (selectedRole == UserRole.DONOR) {
             EnumDropdown(
@@ -233,14 +228,29 @@ fun RegisterScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(14.dp))
+        if (showHiddenFieldsForDonor || showHiddenFieldsForReceiver) {
+            if (selectedRole == UserRole.DONOR) {
+                Spacer(modifier = Modifier.height(14.dp))
 
-        CareKartTextField(
-            value = registrationNumber,
-            onValueChange = { registrationNumber = it },
-            label = "Registration Number",
-            placeholder = "Organization registration number"
-        )
+                CareKartTextField(
+                    value = ownerName,
+                    onValueChange = { ownerName = it },
+                    label = "Owner Name",
+                    placeholder = "Restaurant or mess owner"
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            CareKartTextField(
+                value = registrationNumber,
+                onValueChange = { registrationNumber = it },
+                label = "Registration Number",
+                placeholder = "Organization registration number"
+            )
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Password
         CareKartTextField(
@@ -351,6 +361,7 @@ fun RegisterScreen(
                         // Backend integration will be added later.
                         println("Receiver registration data: $receiverRegistrationDto")
                     }
+
                     else -> {
                         errorMessage = "Admin registration is not supported."
                         isLoading = false

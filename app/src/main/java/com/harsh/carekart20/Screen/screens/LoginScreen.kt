@@ -164,14 +164,14 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Email Text Field
+        // UserId Text Field
         CareKartTextField(
             value = userId,
             onValueChange = {
                 userId = it
                 errorMessage = null
             },
-            label = "UserId",
+            label = if(selectedRole == UserRole.DONOR) "DonorId" else "ReceiverId" ,
             placeholder = if (selectedRole == UserRole.DONOR) "donor101" else "receiver101",
             leadingIcon = Icons.Default.AccountCircle,
         )

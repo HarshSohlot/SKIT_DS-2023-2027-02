@@ -1,6 +1,7 @@
 package com.harsh.carekart20.Screen.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -185,6 +186,9 @@ fun ForgotPasswordScreen(
                 color = EmeraldPrimary,
                 modifier = Modifier
                     .padding(start = 4.dp)
+                    .clickable {
+                        onNavigateBack()
+                    }
             )
         }
     }

@@ -46,17 +46,6 @@ fun CareKartBottomBar(
             )
         )
 
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Assignment, contentDescription = "My Requests") },
-            label = { Text("Requests", fontSize = 10.sp) },
-            selected = false,
-            onClick = { /* Navigate to Requests */ },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = EmeraldPrimary,
-                unselectedIconColor = TextSecondary
-            )
-        )
-
         // Center Action (+) Button matching Slide 5
         NavigationBarItem(
             icon = {
@@ -73,17 +62,6 @@ fun CareKartBottomBar(
             label = { Text("Add Food", fontSize = 10.sp) },
             selected = false,
             onClick = onAddFoodClick
-        )
-
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.ChatBubbleOutline, contentDescription = "Messages") },
-            label = { Text("Messages", fontSize = 10.sp) },
-            selected = false,
-            onClick = { /* Navigate to Messages */ },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = EmeraldPrimary,
-                unselectedIconColor = TextSecondary
-            )
         )
 
         NavigationBarItem(
