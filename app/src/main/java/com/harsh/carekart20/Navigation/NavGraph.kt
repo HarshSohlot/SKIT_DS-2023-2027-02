@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.harsh.carekart20.Model.Dto.DummyProfileData
 import com.harsh.carekart20.Model.UserRole
 import com.harsh.carekart20.Screen.screens.DonorDashboardScreen
 import com.harsh.carekart20.Screen.screens.ForgotPasswordScreen
@@ -24,6 +25,11 @@ fun CareKartNavGraph(
 ) {
     // Current active logged-in user role state
     var currentUserRole by remember { mutableStateOf(UserRole.DONOR) }
+    val profile = when(currentUserRole){
+        UserRole.DONOR -> DummyProfileData.donor
+        UserRole.RECEIVER -> DummyProfileData.receiver
+        UserRole.ADMIN -> DummyProfileData.donor
+    }
 
     NavHost(
         navController = navController,
@@ -117,6 +123,7 @@ fun CareKartNavGraph(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
+                profile = profile,
                 onLogout = {
                     navController.navigate(Screen.Welcome.route) {
                         popUpTo(0) { inclusive = true }
