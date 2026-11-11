@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useFoodData } from '../context/FoodDataContext';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 import { StatCard } from '../components/dashboard/StatCard';
 import { ClaimFoodModal } from '../components/dashboard/ClaimFoodModal';
@@ -38,6 +39,13 @@ import {
  */
 export const ReceiverDashboard = () => {
   const { user } = useAuth();
+  const { 
+    listings: nearbyListings, 
+    claims: claimedListings, 
+    requestClaim, 
+    updateClaimStatus, 
+    metrics 
+  } = useFoodData();
 
   // Active view tab in DashboardLayout: 'feed' | 'tracker' | 'map' | 'needs' | 'security'
   const [activeTab, setActiveTab] = useState('feed');
@@ -50,121 +58,15 @@ export const ReceiverDashboard = () => {
   // Selected food item for Claim modal
   const [selectedFoodItem, setSelectedFoodItem] = useState(null);
 
-  // Available Surplus Food Listings in Jaipur (matching Harshit's model outputs)
-  const [nearbyListings, setNearbyListings] = useState([
-    {
-      id: 'FOOD-501',
-      title: 'Steamed Basmati Rice & Paneer Butter Masala',
-      donorName: 'Green Leaf Bistro',
-      quantity: '30 Portions',
-      category: 'Cooked Meal',
-      distance: '1.8 km',
-      address: 'Plot 12, Malviya Nagar, Jaipur',
-      expiryStatus: 'Valid for 5.0 hours (AI Score 94%)',
-      urgency: 'Moderate',
-      status: 'AVAILABLE',
-      cookedAt: '1.5 hrs ago',
-      tags: ['vegetarian', 'hot-meal']
-    },
-    {
-      id: 'FOOD-502',
-      title: 'Whole Wheat Chapatis & Mix Veg Sabzi',
-      donorName: 'SKIT Campus Mess',
-      quantity: '50 Portions',
-      category: 'Cooked Meal',
-      distance: '0.6 km',
-      address: 'Ramnagaria, Jagatpura, Jaipur',
-      expiryStatus: 'Valid for 3.5 hours (AI Score 98%)',
-      urgency: 'High',
-      status: 'AVAILABLE',
-      cookedAt: '45 mins ago',
-      tags: ['vegetarian', 'campus-mess']
-    },
-    {
-      id: 'FOOD-503',
-      title: 'Fresh Artisan Multi-Grain Loaves & Dinner Rolls',
-      donorName: 'Jaipur Bakers Hub',
-      quantity: '20 Packs',
-      category: 'Bakery & Bread',
-      distance: '3.4 km',
-      address: 'Sector 3, Malviya Nagar, Jaipur',
-      expiryStatus: 'Valid for 12 hours (Packaged)',
-      urgency: 'Low',
-      status: 'AVAILABLE',
-      cookedAt: '3 hrs ago',
-      tags: ['bakery', 'packaged']
-    },
-    {
-      id: 'FOOD-504',
-      title: 'Vegetable Khichdi & Cooling Buttermilk',
-      donorName: 'Central Kitchen Trust',
-      quantity: '40 Portions',
-      category: 'Cooked Meal',
-      distance: '4.8 km',
-      address: 'Sector 5, Mansarovar, Jaipur',
-      expiryStatus: 'Valid for 4.0 hours (AI Score 91%)',
-      urgency: 'Moderate',
-      status: 'AVAILABLE',
-      cookedAt: '2 hrs ago',
-      tags: ['healthy', 'vegetarian']
-    },
-    {
-      id: 'FOOD-505',
-      title: 'Royal Dal Baati Churma Banquet Surplus',
-      donorName: 'Heritage Haveli Banquets',
-      quantity: '60 Portions',
-      category: 'Cooked Meal',
-      distance: '7.2 km',
-      address: 'Queens Road, Vaishali Nagar, Jaipur',
-      expiryStatus: 'Valid for 2.5 hours (Urgent)',
-      urgency: 'High',
-      status: 'AVAILABLE',
-      cookedAt: '3.5 hrs ago',
-      tags: ['banquet', 'hot-food']
-    }
-  ]);
-
-  // Active NGO Pickup Claims
-  const [claimedListings, setClaimedListings] = useState([
-    {
-      claimId: 'CLM-7841',
-      foodId: 'FOOD-499',
-      foodTitle: 'Mixed Vegetable Pulao & Raita',
-      donorName: 'Royal Greens Mess',
-      quantity: '35 Portions',
-      pickupAddress: 'Jagatpura, Jaipur',
-      distance: '1.2 km',
-      expiryStatus: 'Valid for 4 hours',
-      pickupWindow: 'Today within 1 hour',
-      driverName: 'Mohan Lal (Volunteer Driver)',
-      driverPhone: '+91 98291 00223',
-      vehicleNo: 'RJ-14-EB-2918',
-      beneficiaryGroup: 'Sindhi Camp Night Relief Shelter',
-      status: 'APPROVED',
-      claimedAt: '30 mins ago',
-      otpCode: '492815'
-    }
-  ]);
-
   // Handler: When NGO confirms claim in ClaimFoodModal
   const handleConfirmClaim = (newClaim) => {
-    // Add to active claims
-    setClaimedListings([newClaim, ...claimedListings]);
-
-    // Update listing status in feed
-    setNearbyListings(nearbyListings.map((l) => 
-      l.id === newClaim.foodId ? { ...l, status: 'CLAIMED' } : l
-    ));
-
-    // Automatically switch to tracker tab to show the tracking pass
+    requestClaim(newClaim);
     setActiveTab('tracker');
   };
 
   // Handler: Update claim status (e.g. dispatched, completed)
   const handleUpdateClaimStatus = (claimId, newStatus) => {
-    setClaimedListings(claimedListings.map((c) =>
-      c.claimId === claimId ? { ...c, status: newStatus } : c
-    ));
+    updateClaimStatus(claimId, newStatus);
   };
 
   // Receiver custom sidebar navigation
@@ -226,8 +128,8 @@ export const ReceiverDashboard = () => {
       onTabChange={setActiveTab}
       customNavItems={receiverNavItems}
       portalTitle="NGO Relief & Distribution Portal"
-      portalSubtitle="Sprint 3 Milestone (75% Complete): Surplus Feed, Map Engine & Pickup Tracker"
-      sprintBadgeText="Sprint 3: 75% Milestone"
+      portalSubtitle="Sprint 3: 100% Complete — Surplus Feed, Geospatial Map Engine & Pickup Tracker"
+      sprintBadgeText="Sprint 3: 100% Complete"
     >
       {/* =========================================================================
           TAB 1: SURPLUS FOOD DISCOVERY FEED (Main NGO Feed)
@@ -242,7 +144,7 @@ export const ReceiverDashboard = () => {
             <div className="relative z-10 space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-amber-100 text-xs font-bold">
                 <Building2 className="w-3.5 h-3.5 text-amber-200" />
-                <span>Jaipur NGO Food Redistribution Hub (Sprint 3: 75% Milestone)</span>
+                <span>Jaipur NGO Food Redistribution Hub (Sprint 3: 100% Complete)</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
                 Welcome, {user?.name || 'Asha Food Relief Society'}!

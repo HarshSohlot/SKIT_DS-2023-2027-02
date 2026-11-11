@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useFoodData } from '../../context/FoodDataContext';
 import { 
   LayoutDashboard, 
   UtensilsCrossed, 
@@ -20,11 +21,12 @@ import {
   ClipboardList,
   Compass,
   Sliders,
-  FileSpreadsheet
+  FileSpreadsheet,
+  RotateCcw
 } from 'lucide-react';
 
 /**
- * Reusable Dashboard Layout Shell (Sprint 3 Architecture - 85% Milestone)
+ * Reusable Dashboard Layout Shell (Sprint 3: 100% Complete & Synchronized)
  * Provides sidebar navigation, responsive drawer, top bar, and role-based theming for DONOR, RECEIVER, and ADMIN.
  */
 export const DashboardLayout = ({ 
@@ -34,11 +36,13 @@ export const DashboardLayout = ({
   unreadClaimsCount = 0,
   customNavItems,
   portalTitle = "Kartavya's Web Dashboard Portal",
-  portalSubtitle = "Sprint 3 Milestone: Food Redistribution & Administration Control Center",
-  sprintBadgeText = "Sprint 3: 85% Milestone"
+  portalSubtitle = "Sprint 3: Full Dashboard Architecture & Cross-Portal Synchronization",
+  sprintBadgeText = "Sprint 3: 100% Complete"
 }) => {
   const { user, logout } = useAuth();
+  const { resetToDemoData } = useFoodData();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [resetNotice, setResetNotice] = useState(false);
   const location = useLocation();
 
   const isReceiver = user?.role === 'RECEIVER';
@@ -73,6 +77,12 @@ export const DashboardLayout = ({
   ];
 
   const navItems = customNavItems || defaultNavItems;
+
+  const handleReset = () => {
+    resetToDemoData();
+    setResetNotice(true);
+    setTimeout(() => setResetNotice(false), 2500);
+  };
 
   // Role Theme Helpers
   const getBrandGradient = () => {
@@ -140,7 +150,7 @@ export const DashboardLayout = ({
                   Care<span className={getBrandTextColor()}>Kart</span>
                 </span>
                 <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">
-                  Web Portal v1.3
+                  Web Portal v1.4
                 </span>
               </div>
             </Link>
@@ -163,7 +173,7 @@ export const DashboardLayout = ({
                 {user?.name || (isAdmin ? 'System Administrator' : isReceiver ? 'Asha Food Relief NGO' : 'Registered Donor')}
               </span>
               <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full inline-block mt-0.5 ${getUserBadgeStyle()}`}>
-                {user?.role || 'ADMIN'}
+                {user?.role || 'DONOR'}
               </span>
             </div>
           </div>
@@ -200,7 +210,7 @@ export const DashboardLayout = ({
                         isActive
                           ? 'bg-white/20 text-white'
                           : typeof item.badge === 'number'
-                          ? 'bg-purple-100 text-purple-800'
+                          ? 'bg-amber-100 text-amber-800'
                           : 'bg-slate-100 text-slate-600'
                       }`}
                     >
@@ -213,7 +223,7 @@ export const DashboardLayout = ({
           </nav>
         </div>
 
-        {/* Sidebar Footer: Project Academic Meta */}
+        {/* Sidebar Footer: Project Academic Meta & Reset Tool */}
         <div className="p-4 border-t border-slate-100 space-y-3 bg-slate-50/50">
           <div className="px-2 py-2 rounded-xl bg-white border border-slate-200/60 text-[11px] space-y-1">
             <div className="flex items-center justify-between text-slate-400 font-semibold">
@@ -222,11 +232,21 @@ export const DashboardLayout = ({
             </div>
             <div className="flex items-center justify-between text-slate-400 font-semibold">
               <span>Sprint Task:</span>
-              <span className={isAdmin ? "text-purple-700 font-bold" : isReceiver ? "text-amber-700 font-bold" : "text-emerald-700 font-bold"}>
-                Sprint 3 (85%)
+              <span className="text-emerald-700 font-bold">
+                Sprint 3 (100% Done)
               </span>
             </div>
           </div>
+
+          {/* Quick Viva Demo Reset Button */}
+          <button
+            onClick={handleReset}
+            title="Reset sample listings and claims to default state for viva demo"
+            className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 font-semibold text-[11px] transition-colors cursor-pointer"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
+            <span>{resetNotice ? 'Data Reset Complete!' : 'Reset Demo Sample Data'}</span>
+          </button>
 
           <button
             onClick={logout}
@@ -261,7 +281,7 @@ export const DashboardLayout = ({
           </div>
 
           <div className="flex items-center gap-3">
-            {/* 85% Sprint Badge */}
+            {/* 100% Sprint Badge */}
             <span className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${getSprintBadgeStyle()}`}>
               <span className={`w-2 h-2 rounded-full animate-pulse ${getSprintDotStyle()}`} />
               <span>{sprintBadgeText}</span>

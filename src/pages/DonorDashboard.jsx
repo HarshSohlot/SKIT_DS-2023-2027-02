@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useFoodData } from '../context/FoodDataContext';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 import { StatCard } from '../components/dashboard/StatCard';
 import { FoodListingCard } from '../components/dashboard/FoodListingCard';
@@ -30,6 +31,15 @@ import {
 
 export const DonorDashboard = () => {
   const { user } = useAuth();
+  const { 
+    listings, 
+    claims, 
+    addDonation, 
+    approveClaim, 
+    rejectClaim, 
+    updateListingStatus,
+    metrics 
+  } = useFoodData();
 
   // Active navigation tab inside DashboardLayout ('overview' | 'requests' | 'impact' | 'security')
   const [activeTab, setActiveTab] = useState('overview');
@@ -42,113 +52,24 @@ export const DonorDashboard = () => {
   const [showPostModal, setShowPostModal] = useState(false);
   const [selectedQrItem, setSelectedQrItem] = useState(null);
 
-  // Active food listings data
-  const [listings, setListings] = useState([
-    {
-      id: 'DON-101',
-      title: 'Fresh Veg Biryani & Cucumber Raita',
-      foodType: 'Cooked Meal',
-      quantity: '25 Portions',
-      cookedAt: 'Today, 1:30 PM',
-      expiryEstimate: '5.5 Hours (AI Model)',
-      aiHours: 5.5,
-      storageCondition: 'Room Temp (25°C)',
-      pickupLocation: 'Green Leaf Bistro, Malviya Nagar, Jaipur',
-      status: 'AVAILABLE',
-      claimedBy: null,
-      co2Saved: '21.5 kg'
-    },
-    {
-      id: 'DON-102',
-      title: 'Dal Makhani & Whole Wheat Roti',
-      foodType: 'Cooked Meal',
-      quantity: '40 Portions',
-      cookedAt: 'Today, 12:45 PM',
-      expiryEstimate: '3.8 Hours (AI Model)',
-      aiHours: 3.8,
-      storageCondition: 'Heated Warmer (60°C)',
-      pickupLocation: 'Royal Greens Mess, Jagatpura, Jaipur',
-      status: 'CLAIMED',
-      claimedBy: 'Asha Food Relief NGO',
-      co2Saved: '34.0 kg'
-    },
-    {
-      id: 'DON-103',
-      title: 'Fresh Artisan Loaves & Dinner Rolls',
-      foodType: 'Bakery & Bread',
-      quantity: '18 Packs',
-      cookedAt: 'Yesterday, 6:00 PM',
-      expiryEstimate: '14 Hours (AI Model)',
-      aiHours: 14.0,
-      storageCondition: 'Room Temp (22°C)',
-      pickupLocation: 'Jaipur Bakers Hub, Sector 3, Malviya Nagar',
-      status: 'AVAILABLE',
-      claimedBy: null,
-      co2Saved: '15.2 kg'
-    },
-    {
-      id: 'DON-104',
-      title: 'Mixed Vegetable Curry & Steamed Rice',
-      foodType: 'Cooked Meal',
-      quantity: '15 Portions',
-      cookedAt: 'Yesterday, 8:00 PM',
-      expiryEstimate: 'Handover Completed',
-      aiHours: 0,
-      storageCondition: 'Refrigerated (4°C)',
-      pickupLocation: 'Central Kitchen, Mansarovar, Jaipur',
-      status: 'COMPLETED',
-      claimedBy: 'Jaipur Shelter Trust',
-      co2Saved: '12.8 kg'
-    }
-  ]);
-
-  // Live incoming claim requests from NGOs
-  const [claims, setClaims] = useState([
-    {
-      id: 'CLM-901',
-      ngoName: 'Asha Food Relief Society',
-      foodTitle: 'Fresh Veg Biryani & Cucumber Raita',
-      quantity: '25 Portions',
-      requestedTime: 'Within 45 mins (Pickup Van En Route)',
-      contactPhone: '+91 98290 11223',
-      note: 'Distributing to night shelter near Jaipur Railway Station.'
-    }
-  ]);
-
   // Handler: Add new donation from PostFoodModal
   const handleAddDonation = (newDonation) => {
-    setListings([newDonation, ...listings]);
+    addDonation(newDonation);
   };
 
   // Handler: Approve NGO claim
   const handleApproveClaim = (claimId) => {
-    const claim = claims.find((c) => c.id === claimId);
-    if (!claim) return;
-
-    // Update listing status
-    setListings(listings.map((l) => {
-      if (l.title === claim.foodTitle) {
-        return {
-          ...l,
-          status: 'CLAIMED',
-          claimedBy: claim.ngoName
-        };
-      }
-      return l;
-    }));
-
-    // Remove claim from pending
-    setClaims(claims.filter((c) => c.id !== claimId));
+    approveClaim(claimId);
   };
 
   // Handler: Reject NGO claim
   const handleRejectClaim = (claimId) => {
-    setClaims(claims.filter((c) => c.id !== claimId));
+    rejectClaim(claimId);
   };
 
   // Handler: Change listing status (e.g. mark completed)
   const handleStatusChange = (listingId, newStatus) => {
-    setListings(listings.map((l) => (l.id === listingId ? { ...l, status: newStatus } : l)));
+    updateListingStatus(listingId, newStatus);
   };
 
   // Filtered listings based on search and status tabs
@@ -175,6 +96,9 @@ export const DonorDashboard = () => {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       unreadClaimsCount={claims.length}
+      portalTitle="Donor Food Redistribution Center"
+      portalSubtitle="Sprint 3: 100% Complete — Surplus Food Logging, AI Expiry & Handover Verification"
+      sprintBadgeText="Sprint 3: 100% Complete"
     >
       {/* =========================================================================
           TAB 1: OVERVIEW & LISTINGS (Sprint 3 Core Dashboard Design)
@@ -189,7 +113,7 @@ export const DonorDashboard = () => {
             <div className="relative z-10 space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-emerald-100 text-xs font-bold">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
-                <span>Donor Command & Food Quality Center (Sprint 3)</span>
+                <span>Donor Command & Food Quality Center (Sprint 3: 100% Complete)</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
                 Welcome back, {user?.name || 'Jaipur Food Donor'}!

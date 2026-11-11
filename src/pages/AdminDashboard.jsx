@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useFoodData } from '../context/FoodDataContext';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 import { StatCard } from '../components/dashboard/StatCard';
 
@@ -36,6 +37,7 @@ import {
  */
 export const AdminDashboard = () => {
   const { user } = useAuth();
+  const { metrics, listings } = useFoodData();
 
   // Active view tab in DashboardLayout: 'analytics' | 'users' | 'audits' | 'reports'
   const [activeTab, setActiveTab] = useState('analytics');
@@ -207,8 +209,8 @@ export const AdminDashboard = () => {
       onTabChange={setActiveTab}
       customNavItems={adminNavItems}
       portalTitle="CareKart Platform Administration & Governance"
-      portalSubtitle="Sprint 3 Milestone (85% Complete): Analytics Engine & User Verification Control"
-      sprintBadgeText="Sprint 3: 85% Milestone"
+      portalSubtitle="Sprint 3: 100% Complete — Full Analytics Engine & Multi-Portal Synchronization"
+      sprintBadgeText="Sprint 3: 100% Complete"
     >
       {/* =========================================================================
           TAB 1: PLATFORM ANALYTICS & SDG 2 IMPACT (FR-005)
